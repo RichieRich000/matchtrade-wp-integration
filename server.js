@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
-const nodemailer = require('nodemailer');
 const cors = require('cors');
 
 const app = express();
@@ -49,9 +48,9 @@ app.post('/register', async (req, res) => {
         }
       },
       accountConfiguration: {
-        partnerId: null,
-        branchUuid: "",
-        roleUuid: "",
+        partnerId: 100,
+        branchUuid: "f69669de-6d0f-4861-abd1-d5a623b7015b",
+        roleUuid: "8f6705d1-fef5-4121-89e7-55483bc8db6a",
         accountManagerUuid: "",
         ibParentTradingAccountUuid: "",
         crmUserScope: {
@@ -75,9 +74,9 @@ app.post('/register', async (req, res) => {
         accountName: ""
       },
       leadDetails: {
-        statusUuid: "",
-        source: "Starmind.info",
-        providerUuid: "",
+        statusUuid: "69b10a39-6df2-4f4f-8b5e-b72971c6f2d0",
+        source: "starmind.info",
+        providerUuid: "e98e09e6-0555-49dd-b73b-cb8704231333",
         becomeActiveClientTime: ""
       }
     };
@@ -89,29 +88,25 @@ app.post('/register', async (req, res) => {
 
     const response = await axios.post(MATCHTRADE_URL, payload, { headers });
 
-    // Send login email
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'YOUR_GMAIL@gmail.com',
-        pass: 'YOUR_APP_PASSWORD'
-      }
-    });
+    // Get login link from API response
+    const oneTimeToken = response.data.oneTimeToken;
+    const loginLink = `https://client.b-investor.com/auth/one-time-token-login?token=${oneTimeToken}`;
 
-    await transporter.sendMail({
-      from: 'YOUR_GMAIL@gmail.com',
-      to: data.email,
-      subject: 'Your Trading Account Has Been Created',
-      text: `Welcome ${data.firstName},\n\nYour account has been created.\nLogin: https://client.b-investor.com\nEmail: ${data.email}\nPassword: ${password}\n\nPlease login to access your account.`
+    // Send response
+    res.status(200).json({
+      success: true,
+      message: 'User created.',
+      redirectUrl: loginLink
     });
-
-    res.status(200).json({ success: true, message: 'User created and email sent.' });
 
   } catch (error) {
     console.error(error.response?.data || error.message);
-    res.status(500).json({ success: false, error: error.response?.data || error.message });
+    res.status(500).json({
+      success: false,
+      error: error.response?.data || error.message
+    });
   }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
