@@ -8,10 +8,12 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+// Match-Trade API config
 const MATCHTRADE_URL = 'https://broker-api-wl.match-trade.com/v1/accounts';
 const OFFER_UUID = '1a3d47dd-ea8c-4529-9e36-8a42499fcc69';
 const API_TOKEN = '9_Qd-TWhdmywM76uEnoex33Lci3KD2gt0wX7wZcMSuM=';
 
+// Generates random password
 function generatePassword() {
   return Math.random().toString(36).slice(-10);
 }
@@ -82,7 +84,7 @@ app.post('/register', async (req, res) => {
 
     const headers = {
       'Content-Type': 'application/json',
-      'api-token': API_TOKEN
+      'Authorization': `Bearer ${API_TOKEN}`
     };
 
     const response = await axios.post(MATCHTRADE_URL, payload, { headers });
@@ -104,6 +106,7 @@ app.post('/register', async (req, res) => {
     });
 
     res.status(200).json({ success: true, message: 'User created and email sent.' });
+
   } catch (error) {
     console.error(error.response?.data || error.message);
     res.status(500).json({ success: false, error: error.response?.data || error.message });
